@@ -1,0 +1,5 @@
+# 项目 bundle：一行浏览器插件，向侧边栏加入「项目」入口，并在主面板承载讨论与看板。
+# 浏览器半边由 package.json 的 dsh.client 提供（client.js），index.js 是 Host 半边。
+- insert:
+    - id: ui-projects
+      name: 'dsh-plugin-projects'
