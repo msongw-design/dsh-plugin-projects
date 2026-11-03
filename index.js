@@ -698,7 +698,7 @@ export class ProjectsHost {
       // Host-only features the Client must see here before it calls them. The
       // Host half only reloads with the app while the Client half reloads with
       // the page, so a refreshed page can briefly run ahead of its Host.
-      capabilities: { image: true },
+      capabilities: { image: true, reopenNote: true },
       defaults: {
         relay: this.loaded.relay,
         defaultRepoPath: typeof process.cwd === 'function' ? process.cwd() : os.homedir(),

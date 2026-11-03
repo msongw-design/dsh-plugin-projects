@@ -107,13 +107,13 @@
   me: { name: string },
   activeId: string | null,
   autoFix: boolean,
-  capabilities: { image: boolean },                        // Host 已加载的能力，Client 据此决定是否调用
+  capabilities: { image: boolean, reopenNote: boolean },  // Host 已加载的能力，Client 据此决定是否调用
   defaults: { relay: string, defaultRepoPath: string },   // 新建项目表单的预填
   projects: [Project]
 }
 ```
 
-注意：`capabilities` 描述的是 Host 半已经加载的能力。Host 半只在应用重启后重新加载，Client 半随页面刷新，所以刚刷新过页面的面板可能暂时拿不到 `capabilities.image`；此时不要调用 `/image`，而要在输入框下提示「重启后生效」。
+注意：`capabilities` 描述的是 Host 半已经加载的能力。Host 半只在应用重启后重新加载，Client 半随页面刷新，所以刚刷新过页面的面板可能暂时拿不到 `capabilities.image`；此时不要调用 `/image`，而要在输入框下提示「重启后生效」。同理，`capabilities.reopenNote` 缺失时 Host 会静默丢弃 `/issue` 的 `note`，Client 不要提交非空说明，而要在重新打开弹窗里提示重启。
 
 ### Project
 
@@ -175,7 +175,7 @@
   - 主区顶栏：项目名（悬停名称时右侧浮现「重命名」铅笔图标）· 成员数 · 中继状态点 · 「邀请」按钮 · 设置齿轮。
   - 主区选项卡：「讨论」/「看板」，看板 tab 上显示待处理数（triage+open）。
   - 讨论 tab：消息流（自己右侧、他人左侧、助手消息带「项目助手」标记与浅蓝底），系统 notice 居中细线样式；输入框 Enter 发送 / Shift+Enter 换行；粘贴图片即直接发送（发送中显示「正在发送图片…」，失败在输入框下方提示原因）；图片气泡点击新窗口打开原图；「引用」可回复某条消息（引用条可取消）。
-  - 看板 tab：四组（待确认 + 待修复合并为「待处理」，修复中，待验收，已完成/已忽略），卡片显示类型徽标（缺陷=红、体验点=蓝）、标题、来源人、时间，有重新打开说明时也显示在卡片上；操作按钮：待处理→「修复」「忽略」；修复中→状态文字；待验收→「标记完成」「重新打开」；已完成/已忽略→「重新打开」。「重新打开」先弹一个可选的一句话说明输入框，提交后卡片回到待处理，说明随 `note` 发给 Host。
+  - 看板 tab：四组（待确认 + 待修复合并为「待处理」，修复中，待验收，已完成/已忽略），卡片显示类型徽标（缺陷=红、体验点=蓝）、标题、来源人、时间，有重新打开说明时也显示在卡片上；操作按钮：待处理→「修复」「忽略」；修复中→状态文字；待验收→「标记完成」「重新打开」；已完成/已忽略→「重新打开」。「重新打开」先弹一个可选的一句话说明输入框，提交后卡片回到待处理，说明随 `note` 发给 Host；`capabilities.reopenNote` 为 false（Host 未重启）时带说明的提交不发请求，弹窗内提示重启，留空仍可重新打开。
 - 视觉：只用蓝/灰/黑，无阴影堆叠、无渐变、无 emoji；圆角 8px，1px 边框；暗色模式跟随 DSH（使用 `prefers-color-scheme` 或继承 CSS 变量 `--dsh-*` 若有）。
 - 文案：中文为主；`DICTS.zh` / `DICTS.en` 内联在 client.js（照抄 chat-room 的 locale 注册方式）。
 - 空态：无项目时展示一句说明 + 两个按钮；无消息时一句话；无卡片时一句话。

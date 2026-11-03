@@ -444,20 +444,21 @@ test('HTTP /image：上传落盘并从同源读回', async () => {
   }
 });
 
-test('State 暴露 capabilities：Client 据此判断 Host 是否已加载图片通路', async () => {
+test('State 暴露 capabilities：Client 据此判断 Host 是否已加载图片通路与重新打开说明', async () => {
   const relay = await startFakeRelay();
   const host = makeHost(relay.url, tmpDir('capabilities'));
   try {
     host.start();
     host.createProject({ name: '能力位', repoPath: os.tmpdir() });
-    assert.deepEqual(host.snapshot().capabilities, { image: true });
+    assert.deepEqual(host.snapshot().capabilities, { image: true, reopenNote: true });
 
     const read = makeResponse();
     await host.handleHttp(makeRequest({ method: 'GET', url: '/plugin/projects/state' }), read.res);
     const body = JSON.parse(read.result().body.toString('utf8'));
     // 旧 Host 的 State 里没有 capabilities；Client 必须把它当成「图片通路不可用」，
     // 提示重启，而不是把字节发给一个没有 /image 路由的 Host。
-    assert.deepEqual(body.capabilities, { image: true });
+    // 同理，旧 Host 会丢弃 reopen 的 note，Client 也不能提交非空说明。
+    assert.deepEqual(body.capabilities, { image: true, reopenNote: true });
   } finally {
     host.dispose();
     await relay.close();

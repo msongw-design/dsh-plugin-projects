@@ -105,6 +105,7 @@ window.__ModuleLoader__.load({
         reopenNoteLabel: '这次还要优化什么（可选）',
         reopenNotePlaceholder: '例如：功能已经能用了，这次只想把按钮间距和右对齐再调一下',
         reopenNoteView: '重新打开说明：{note}',
+        reopenNoteNeedsRestart: '当前运行的还是旧版插件，这条说明要重启 DeepSeek Harness 后才会生效；留空可以先把卡片重新打开。',
         assistantWorking: '项目助手正在修复…',
         assistantError: '项目助手修复失败',
         newTitle: '新建项目',
@@ -220,6 +221,7 @@ window.__ModuleLoader__.load({
         reopenNoteLabel: 'What still needs work (optional)',
         reopenNotePlaceholder: 'e.g. It works now; this round only needs the button spacing and right alignment fixed',
         reopenNoteView: 'Reopen note: {note}',
+        reopenNoteNeedsRestart: 'The running app still uses the old plugin, so this note only takes effect after restarting DeepSeek Harness. Leave it blank to reopen the card now.',
         assistantWorking: 'The project assistant is fixing it…',
         assistantError: 'The project assistant failed',
         newTitle: 'New project',
@@ -1016,6 +1018,14 @@ window.__ModuleLoader__.load({
       const submit = async (event) => {
         if (event) event.preventDefault();
         if (busy) return;
+        const guidance = note.trim();
+        // An old Host does not read `note` and would drop the line without a
+        // trace. Refusing here points at the restart instead of losing what
+        // the person typed; an empty note still reopens the card on any Host.
+        if (guidance && !props.canNote) {
+          setError(t('reopenNoteNeedsRestart'));
+          return;
+        }
         setBusy(true);
         setError('');
         // The note is optional: an empty one only moves the card back to the
@@ -1024,7 +1034,7 @@ window.__ModuleLoader__.load({
           projectId: props.projectId,
           issueId: props.issueId,
           action: 'reopen',
-          note: note.trim(),
+          note: guidance,
         });
         setBusy(false);
         if (result && result.ok) {
@@ -1036,7 +1046,12 @@ window.__ModuleLoader__.load({
 
       return h(
         Dialog,
-        { t, title: props.title, hint: t('reopenHint'), onClose: props.onClose },
+        {
+          t,
+          title: props.title,
+          hint: props.canNote ? t('reopenHint') : t('reopenNoteNeedsRestart'),
+          onClose: props.onClose,
+        },
         h(
           'form',
           { className: 'dsh-proj-form', onSubmit: submit },
@@ -1438,6 +1453,10 @@ window.__ModuleLoader__.load({
       // apart, so the paste path can name the restart instead of failing after
       // sending the bytes.
       const canSendImage = Boolean(state && state.capabilities && state.capabilities.image);
+      // Same version split for the reopen note: the Host stores it as
+      // `issue.feedback` and feeds it to the next Worker. An old Host silently
+      // ignores `note`, so ask before typing instead of losing the line.
+      const canReopenNote = Boolean(state && state.capabilities && state.capabilities.reopenNote);
 
       // Switching projects never carries a draft or a quote across; each project
       // resumes its own draft, which also survives leaving and re-entering the
@@ -2242,6 +2261,7 @@ window.__ModuleLoader__.load({
           return h(ReopenDialog, {
             t,
             post,
+            canNote: canReopenNote,
             projectId: active.id,
             issueId: issue.id,
             title: tf('reopenTitleFor', { title: issue.title || t('unknown') }),

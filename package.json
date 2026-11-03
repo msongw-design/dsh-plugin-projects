@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-projects",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "项目：邀请成员共同讨论，讨论中识别出的缺陷与体验点自动进入看板并由 Agent 复现修复",
   "license": "MIT",

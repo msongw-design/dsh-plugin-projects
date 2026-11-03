@@ -56,7 +56,7 @@ DSH 侧边栏的「项目」面板：邀请成员进来共同讨论，讨论里�
   ```
 
   当前 37 个用例覆盖：识别规则、邀请码往返、信封与越权字段过滤、折叠、状态流转、重新打开说明的存放与清空、项目重命名、双实例中继同步（含图片附件落盘）、能力位、失败回退、输入边界。Host 测试用进程内假中继，不访问公网。
-- 生效范围：改 `client.js` 刷新页面即可；改 `index.js`/`protocol.js` 必须重启 DSH（Host 半只在启动时加载）。两者版本错开时，Client 通过 State 的 `capabilities` 判断 Host 是否已支持图片，不支持就提示重启，而不是上传失败。
+- 生效范围：改 `client.js` 刷新页面即可；改 `index.js`/`protocol.js` 必须重启 DSH（Host 半只在启动时加载）。两者版本错开时，Client 通过 State 的 `capabilities` 判断 Host 是否已支持对应能力（`image` / `reopenNote`），不支持就提示重启，而不是上传失败或让重新打开说明被静默丢弃。
 - 安装到 profile：`dsh plugin --profile <name> add "link:<本目录>"`，并把 `dsh-plugin-projects` 加进 profile 的 `dsh.profile.bundles`，重启 DSH。
 
 ## License
